@@ -171,7 +171,7 @@ export default function Community() {
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
                                 <a
-                                    href="https://discord.com/invite/vR3Spb5DQU"
+                                    href="https://discord.com/invite/vSPKYsUnyz"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex-1">
@@ -179,7 +179,7 @@ export default function Community() {
                                         Подать заявку
                                     </button>
                                 </a>
-                                <a href="/wiki" className="flex-1">
+                                <a href="/wiki/about" className="flex-1">
                                     <button className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-xl font-semibold transition-all duration-200 border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white h-12 sm:h-14 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base">
                                         Изучить вики
                                     </button>
