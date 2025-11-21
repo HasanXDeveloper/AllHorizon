@@ -1,21 +1,58 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
-import { X } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 
 const AuthModal = ({ isOpen, onClose }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({ username: '', email: '', password: '', general: '' });
     const { login, register, socialLogin } = useAuth();
 
     if (!isOpen) return null;
 
+    const translateError = (errorMsg) => {
+        const translations = {
+            'A user is already registered with this e-mail address.': 'Пользователь с таким email уже зарегистрирован',
+            'A user with that username already exists.': 'Пользователь с таким именем уже существует',
+            'Enter a valid email address.': 'Введите корректный email адрес',
+            'This field may not be blank.': 'Это поле не может быть пустым',
+            'This password is too short. It must contain at least 8 characters.': 'Пароль слишком короткий. Минимум 8 символов',
+            'This password is too common.': 'Этот пароль слишком простой',
+            'This password is entirely numeric.': 'Пароль не может состоять только из цифр',
+            'The password is too similar to the username.': 'Пароль слишком похож на имя пользователя',
+            'Unable to log in with provided credentials.': 'Неверный email или пароль',
+            'Login failed': 'Ошибка входа',
+            'Registration failed': 'Ошибка регистрации'
+        };
+        return translations[errorMsg] || errorMsg;
+    };
+
+    const validateUsername = (username) => {
+        if (username.length < 3) {
+            return 'Имя пользователя должно содержать минимум 3 символа';
+        }
+        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+            return 'Имя пользователя может содержать только английские буквы, цифры, дефис и подчеркивание';
+        }
+        return null;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setErrors({ username: '', email: '', password: '', general: '' });
+
+        // Client-side username validation for registration
+        if (!isLogin) {
+            const usernameError = validateUsername(username);
+            if (usernameError) {
+                setErrors({ username: usernameError, email: '', password: '', general: '' });
+                return;
+            }
+        }
+
         let result;
         if (isLogin) {
             result = await login(email, password);
@@ -25,13 +62,40 @@ const AuthModal = ({ isOpen, onClose }) => {
 
         if (result.success) {
             onClose();
+            setEmail('');
+            setPassword('');
+            setUsername('');
         } else {
+            const newErrors = { username: '', email: '', password: '', general: '' };
+
             if (typeof result.error === 'object') {
-                setError(Object.values(result.error).flat().join(', '));
+                if (result.error.username) {
+                    newErrors.username = translateError(result.error.username[0]);
+                }
+                if (result.error.email) {
+                    newErrors.email = translateError(result.error.email[0]);
+                }
+                if (result.error.password || result.error.password1 || result.error.password2) {
+                    const pwdError = result.error.password || result.error.password1 || result.error.password2;
+                    newErrors.password = translateError(pwdError[0]);
+                }
+                if (result.error.non_field_errors) {
+                    newErrors.general = translateError(result.error.non_field_errors[0]);
+                }
             } else {
-                setError(result.error);
+                newErrors.general = translateError(result.error);
             }
+
+            setErrors(newErrors);
         }
+    };
+
+    const switchMode = () => {
+        setIsLogin(!isLogin);
+        setErrors({ username: '', email: '', password: '', general: '' });
+        setEmail('');
+        setPassword('');
+        setUsername('');
     };
 
     return createPortal(
@@ -57,9 +121,18 @@ const AuthModal = ({ isOpen, onClose }) => {
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                    className={`w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border rounded-xl text-gray-900 dark:text-white focus:outline-none transition-colors ${errors.username
+                                        ? 'border-red-500 focus:border-red-600'
+                                        : 'border-gray-200 dark:border-white/10 focus:border-purple-500'
+                                        }`}
                                     placeholder="Username"
                                 />
+                                {errors.username && (
+                                    <div className="mt-1 flex items-center gap-1 text-red-600 dark:text-red-400 text-sm">
+                                        <AlertCircle size={14} />
+                                        <span>{errors.username}</span>
+                                    </div>
+                                )}
                             </div>
                         )}
                         <div>
@@ -68,10 +141,19 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                className={`w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border rounded-xl text-gray-900 dark:text-white focus:outline-none transition-colors ${errors.email
+                                    ? 'border-red-500 focus:border-red-600'
+                                    : 'border-gray-200 dark:border-white/10 focus:border-purple-500'
+                                    }`}
                                 placeholder="name@example.com"
                                 required
                             />
+                            {errors.email && (
+                                <div className="mt-1 flex items-center gap-1 text-red-600 dark:text-red-400 text-sm">
+                                    <AlertCircle size={14} />
+                                    <span>{errors.email}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -80,15 +162,25 @@ const AuthModal = ({ isOpen, onClose }) => {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                className={`w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border rounded-xl text-gray-900 dark:text-white focus:outline-none transition-colors ${errors.password
+                                    ? 'border-red-500 focus:border-red-600'
+                                    : 'border-gray-200 dark:border-white/10 focus:border-purple-500'
+                                    }`}
                                 placeholder="••••••••"
                                 required
                             />
+                            {errors.password && (
+                                <div className="mt-1 flex items-center gap-1 text-red-600 dark:text-red-400 text-sm">
+                                    <AlertCircle size={14} />
+                                    <span>{errors.password}</span>
+                                </div>
+                            )}
                         </div>
 
-                        {error && (
-                            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-600 dark:text-red-200 text-sm">
-                                {error}
+                        {errors.general && (
+                            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-600 dark:text-red-200 text-sm flex items-center gap-2">
+                                <AlertCircle size={16} />
+                                {errors.general}
                             </div>
                         )}
 
@@ -131,7 +223,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     <div className="mt-6 text-center text-sm text-gray-500 dark:text-white/50">
                         {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}
                         <button
-                            onClick={() => setIsLogin(!isLogin)}
+                            onClick={switchMode}
                             className="ml-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
                         >
                             {isLogin ? 'Создать' : 'Войти'}
