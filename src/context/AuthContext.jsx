@@ -18,7 +18,6 @@ const getCookie = (name) => {
     return cookieValue;
 };
 
-// Add interceptor to inject CSRF token
 axios.interceptors.request.use(config => {
     const csrftoken = getCookie('csrftoken');
     if (csrftoken) {
@@ -35,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const API_URL = 'http://localhost:8000'; // Adjust if needed
+    const API_URL = 'http://localhost:8000';
 
     useEffect(() => {
         fetchUser();
@@ -46,8 +45,6 @@ export const AuthProvider = ({ children }) => {
             const response = await axios.get(`${API_URL}/api/auth/user/`);
             setUser(response.data);
         } catch (error) {
-            // console.error("Failed to fetch user", error);
-            // Silent fail is okay here, just means not logged in
             setUser(null);
         } finally {
             setLoading(false);
@@ -60,9 +57,6 @@ export const AuthProvider = ({ children }) => {
                 email,
                 password,
             });
-            // With cookie auth, we don't get a token back in body usually, 
-            // or if we do, we don't need to store it if using httpOnly cookies.
-            // Just fetch user to confirm login.
             await fetchUser();
             return { success: true };
         } catch (error) {
@@ -95,13 +89,9 @@ export const AuthProvider = ({ children }) => {
             console.error("Logout error", e);
         }
         setUser(null);
-        // localStorage.removeItem('token'); // No longer using token in local storage
     };
 
     const socialLogin = (provider, process = 'login') => {
-        // Redirect to backend social login URL with process param if needed
-        // For connecting accounts, we typically use a different flow or param
-        // django-allauth uses 'process=connect' for linking accounts
         let url = `${API_URL}/accounts/${provider}/login/`;
         let params = new URLSearchParams();
 
@@ -109,7 +99,6 @@ export const AuthProvider = ({ children }) => {
             params.append('process', 'connect');
         }
 
-        // Always redirect back to frontend
         params.append('next', 'http://localhost:3000');
 
         window.location.href = `${url}?${params.toString()}`;

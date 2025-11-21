@@ -5,7 +5,7 @@ import { Wallet, ArrowUpRight, ArrowDownLeft, RefreshCw, History, AlertCircle } 
 import Toast from '../components/Toast';
 
 const Bank = () => {
-    const { user } = useAuth();
+    const { user, socialLogin } = useAuth();
     const [balance, setBalance] = useState(0);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -111,7 +111,7 @@ const Bank = () => {
                         Для обеспечения безопасности ваших средств и синхронизации с игровым сервером необходимо привязать аккаунт Discord.
                     </p>
                     <button
-                        onClick={() => window.location.href = 'http://localhost:8000/api/auth/social/login/discord/?process=connect&next=http://localhost:3000/bank'}
+                        onClick={() => socialLogin('discord', 'connect')}
                         className="inline-flex items-center justify-center gap-3 py-4 px-8 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-bold text-lg shadow-lg shadow-[#5865F2]/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                         <img src="https://www.svgrepo.com/show/353655/discord-icon.svg" className="w-6 h-6 brightness-0 invert" alt="" />
