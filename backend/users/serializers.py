@@ -5,13 +5,25 @@ from rest_framework import serializers
 class CustomUserDetailsSerializer(UserDetailsSerializer):
     avatar = serializers.SerializerMethodField()
     social_accounts = serializers.SerializerMethodField()
+    is_online_hidden = serializers.BooleanField(source='social_profile.is_online_hidden', read_only=False)
 
     class Meta(UserDetailsSerializer.Meta):
-        fields = UserDetailsSerializer.Meta.fields + ('avatar', 'social_accounts')
+        fields = UserDetailsSerializer.Meta.fields + ('id', 'avatar', 'social_accounts', 'is_online_hidden')
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('social_profile', {})
+        is_online_hidden = profile_data.get('is_online_hidden')
+
+        if is_online_hidden is not None:
+            instance.social_profile.is_online_hidden = is_online_hidden
+            instance.social_profile.save()
+            
+        return super().update(instance, validated_data)
 
     def get_avatar(self, obj):
         discord_account = SocialAccount.objects.filter(user=obj, provider='discord').first()
         if discord_account:
+            # print(f"DEBUG: Discord extra_data for {obj.username}: {discord_account.extra_data}")
             return discord_account.get_avatar_url()
         
         google_account = SocialAccount.objects.filter(user=obj, provider='google').first()

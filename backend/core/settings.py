@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+MC_API_KEY = os.getenv('MC_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     # Local
     'users',
     'bank',
+    'social',
 ]
 
 SITE_ID = 1
@@ -73,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware', # Allauth middleware
+    'social.middleware.UpdateLastActivityMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -140,6 +142,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -160,7 +164,6 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'my-app-auth',
     'JWT_AUTH_REFRESH_COOKIE': 'my-app-refresh-token',
     'JWT_AUTH_HTTPONLY': True,
-    'JWT_AUTH_SAMESITE': 'Lax',
     'JWT_AUTH_SAMESITE': 'Lax',
     'JWT_AUTH_SECURE': False,
     'USER_DETAILS_SERIALIZER': 'users.serializers.CustomUserDetailsSerializer',
@@ -224,8 +227,4 @@ ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True
-
-# Redirects
-LOGIN_REDIRECT_URL = 'http://localhost:3000'
-LOGOUT_REDIRECT_URL = 'http://localhost:3000'
 ACCOUNT_CONNECT_REDIRECT_URL = 'http://localhost:3000'

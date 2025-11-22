@@ -24,4 +24,11 @@ urlpatterns = [
     path('api/auth/social/', include('allauth.socialaccount.urls')), # For social auth callbacks
     path('accounts/', include('allauth.urls')),
     path('api/bank/', include('bank.urls')),
+    path('api/social/', include('social.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

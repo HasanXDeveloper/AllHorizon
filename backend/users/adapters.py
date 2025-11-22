@@ -7,15 +7,15 @@ from django.contrib.auth import get_user_model
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     def clean_username(self, username, shallow=False):
-        # Default validation from allauth
+        
         username = super().clean_username(username, shallow)
-        # Custom validation (min length, allowed chars)
+        
         validator = UsernameValidator()
         validator(username)
         return username
 
     def clean_email(self, email, **kwargs):
-        # Default validation (format etc.)
+        
         email = super().clean_email(email, **kwargs)
         User = get_user_model()
         if User.objects.filter(email__iexact=email).exists():
