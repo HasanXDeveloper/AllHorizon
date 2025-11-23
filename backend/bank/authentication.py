@@ -1,6 +1,7 @@
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
+import secrets
 
 class MCKeyAuthentication(BaseAuthentication):
     def authenticate(self, request):
@@ -15,7 +16,8 @@ class MCKeyAuthentication(BaseAuthentication):
         except ValueError:
             return None
 
-        if key != settings.MC_API_KEY:
+        # Use secrets.compare_digest to prevent timing attacks
+        if not secrets.compare_digest(key, settings.MC_API_KEY):
             raise AuthenticationFailed('Invalid API Key')
 
         return (None, None) # No user, just authenticated

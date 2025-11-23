@@ -51,6 +51,10 @@ export default function Header({ theme, setTheme }) {
     setThemeMenuOpen(false)
   }
 
+  const handleNavClick = () => {
+    setMobileMenuOpen(false)
+  }
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
@@ -119,21 +123,25 @@ export default function Header({ theme, setTheme }) {
         </div>
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 px-4 pb-4 space-y-3 animate-fadeInUp">
-            <Link href="/" className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+            <Link href="/" onClick={handleNavClick} className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
               <i className="fas fa-home text-lg"></i>
               <span>Главная</span>
             </Link>
-            <Link href="/wiki/getting-started" className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+            <Link href="/wiki/getting-started" onClick={handleNavClick} className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
               <i className="fas fa-book text-lg"></i>
               <span>Вики</span>
             </Link>
-            <Link href="/rules" className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+            <Link href="/rules" onClick={handleNavClick} className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
               <i className="fas fa-file-contract text-lg"></i>
               <span>Правила</span>
             </Link>
-            <Link href="/bank" className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+            <Link href="/bank" onClick={handleNavClick} className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
               <i className="fas fa-university text-lg"></i>
               <span>Банк</span>
+            </Link>
+            <Link href="/social" onClick={handleNavClick} className="flex items-center gap-3 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+              <i className="fas fa-users text-lg"></i>
+              <span>Сообщество</span>
             </Link>
           </div>
         )}
@@ -165,6 +173,10 @@ export default function Header({ theme, setTheme }) {
             <Link href="/bank" className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors font-medium">
               <i className="fas fa-university text-base"></i>
               <span>Банк</span>
+            </Link>
+            <Link href="/social" className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors font-medium">
+              <i className="fas fa-users text-base"></i>
+              <span>Сообщество</span>
             </Link>
 
             <div className="relative" ref={desktopThemeRef}>

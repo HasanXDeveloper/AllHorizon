@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import get_csrf_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/csrf/', get_csrf_token, name='csrf'),
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/auth/social/', include('allauth.socialaccount.urls')), # For social auth callbacks

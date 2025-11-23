@@ -7,7 +7,15 @@ class UsernameValidator:
     Валидатор для username:
     - Минимум 3 символа
     - Только английские буквы, цифры, дефис и подчеркивание
+    - Запрещенные имена (admin, root, system и т.д.)
     """
+    
+    RESERVED_NAMES = {
+        'admin', 'administrator', 'root', 'system', 'moderator', 'mod',
+        'support', 'help', 'staff', 'owner', 'superuser', 'user',
+        'api', 'www', 'mail', 'ftp', 'localhost', 'server',
+        'null', 'undefined', 'none', 'test', 'demo', 'guest'
+    }
     
     def __call__(self, value):
         if len(value) < 3:
@@ -20,4 +28,10 @@ class UsernameValidator:
             raise ValidationError(
                 'Имя пользователя может содержать только английские буквы, цифры, дефис и подчеркивание',
                 code='username_invalid_chars'
+            )
+        
+        if value.lower() in self.RESERVED_NAMES:
+            raise ValidationError(
+                'Это имя пользователя зарезервировано системой',
+                code='username_reserved'
             )

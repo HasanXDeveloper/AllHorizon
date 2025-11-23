@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     UserSearchView, FriendRequestListView, FriendRequestDetailView,
     FriendListView, MessageListView, MessageDetailView, BlockUserView, ClearChatView, 
-    BlockedUsersListView, UpdateProfileSettingsView, RemoveFriendView
+    BlockedUsersListView, UpdateProfileSettingsView, RemoveFriendView, CurrentUserView,
+    MuteUserView, UnmuteUserView
 )
 
 urlpatterns = [
@@ -16,5 +17,8 @@ urlpatterns = [
     path('users/<int:user_id>/clear-chat/', ClearChatView.as_view(), name='clear-chat'),
     path('users/<int:user_id>/remove-friend/', RemoveFriendView.as_view(), name='remove-friend'),
     path('blocked/', BlockedUsersListView.as_view(), name='blocked-users'),
+    path('me/', CurrentUserView.as_view(), name='current-user'),
     path('profile/settings/', UpdateProfileSettingsView.as_view(), name='profile-settings'),
+    path('users/<int:user_id>/mute/', MuteUserView.as_view(), name='mute-user'),
+    path('users/<int:user_id>/unmute/', UnmuteUserView.as_view(), name='unmute-user'),
 ]

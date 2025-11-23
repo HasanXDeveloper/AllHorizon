@@ -24,6 +24,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
+        # If the social account is already connected, just update data
         if sociallogin.is_existing:
             user = sociallogin.user
             if sociallogin.account.provider == 'discord':
@@ -33,6 +34,18 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 if 'email' in discord_data and discord_data['email']:
                     user.email = discord_data['email']
                 user.save()
+            return
+
+        # If not connected, check if a user with this email already exists
+        email = sociallogin.account.extra_data.get('email')
+        if email:
+            User = get_user_model()
+            try:
+                user = User.objects.get(email__iexact=email)
+                # If user exists, connect this social account to the existing user
+                sociallogin.connect(request, user)
+            except User.DoesNotExist:
+                pass
 
     def populate_user(self, request, sociallogin, data):
         user = super().populate_user(request, sociallogin, data)

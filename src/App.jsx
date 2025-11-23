@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Route, Switch } from 'wouter'
+import { Route, Switch, useLocation } from 'wouter'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Features from './components/Features'
@@ -9,6 +9,7 @@ import Footer from './components/Footer'
 import Wiki from './pages/Wiki';
 import Rules from './pages/Rules';
 import Bank from './pages/Bank';
+import Social from './pages/Social';
 import NotFound from './pages/NotFound'
 
 function HomePage() {
@@ -23,6 +24,7 @@ function HomePage() {
 }
 
 function App() {
+  const [location] = useLocation();
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme')
@@ -65,12 +67,13 @@ function App() {
           <Route path="/wiki/:slug" component={Wiki} />
           <Route path="/rules" component={Rules} />
           <Route path="/bank" component={Bank} />
+          <Route path="/social" component={Social} />
           <Route path="/" component={HomePage} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
       </main>
-      <Footer />
+      {location !== '/social' && <Footer />}
     </div>
   )
 }

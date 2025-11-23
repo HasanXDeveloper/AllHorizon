@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'wouter'
-import { AlertTriangle, Shield, Map as MapIcon, MessageSquare, AlertCircle, CheckCircle, Info } from 'lucide-react'
+import { AlertTriangle, Shield, Map as MapIcon, MessageCircle, AlertCircle, CheckCircle, Info } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { ScrollReveal } from '../components/ScrollReveal'
 
@@ -292,7 +292,7 @@ export default function Rules() {
                             <div className="rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-[#111] p-8 text-center space-y-6">
                                 <div className="flex justify-center mb-4">
                                     <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                                        <MessageSquare className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                                        <MessageCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                                     </div>
                                 </div>
                                 <h3 className="text-2xl font-bold text-neutral-900 dark:text-white">Есть вопросы по правилам?</h3>

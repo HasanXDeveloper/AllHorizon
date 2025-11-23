@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import FriendRequest, Message, Attachment
+from .models import FriendRequest, Message, Attachment, MutedUser, BlockedUser
+import bleach
 
 from allauth.socialaccount.models import SocialAccount
 
@@ -10,10 +11,17 @@ class UserSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     is_online = serializers.SerializerMethodField()
     is_online_hidden = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
+    bio = serializers.SerializerMethodField()
+    banner_color = serializers.SerializerMethodField()
+    favorite_game = serializers.SerializerMethodField()
+    last_activity = serializers.SerializerMethodField()
+    is_muted = serializers.SerializerMethodField()
+    is_blocked = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'avatar', 'is_online', 'is_online_hidden']
+        fields = ['id', 'username', 'email', 'avatar', 'is_online', 'is_online_hidden', 'unread_count', 'bio', 'banner_color', 'favorite_game', 'date_joined', 'last_activity', 'is_muted', 'is_blocked']
 
     def get_avatar(self, obj):
         # Try Discord first
@@ -44,6 +52,50 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.social_profile.is_online_hidden
         return False
 
+    def get_unread_count(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return Message.objects.filter(
+                sender=obj,
+                receiver=request.user,
+                is_read=False
+            ).count()
+        return 0
+
+    def get_bio(self, obj):
+        if hasattr(obj, 'social_profile'):
+            # Sanitize bio to prevent XSS
+            return bleach.clean(obj.social_profile.bio, tags=[], strip=True)
+        return ''
+
+    def get_banner_color(self, obj):
+        if hasattr(obj, 'social_profile'):
+            return obj.social_profile.banner_color
+        return 'purple'
+
+    def get_favorite_game(self, obj):
+        if hasattr(obj, 'social_profile'):
+            # Sanitize favorite_game to prevent XSS
+            return bleach.clean(obj.social_profile.favorite_game, tags=[], strip=True)
+        return ''
+
+    def get_last_activity(self, obj):
+        if hasattr(obj, 'social_profile') and obj.social_profile.last_activity:
+            return obj.social_profile.last_activity
+        return None
+
+    def get_is_muted(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return MutedUser.objects.filter(muter=request.user, muted=obj).exists()
+        return False
+
+    def get_is_blocked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return BlockedUser.objects.filter(blocker=request.user, blocked=obj).exists()
+        return False
+
 class FriendRequestSerializer(serializers.ModelSerializer):
     from_user = UserSerializer(read_only=True)
     to_user = UserSerializer(read_only=True)
@@ -55,22 +107,16 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ['from_user', 'status', 'created_at']
 
     def create(self, validated_data):
-        print(f"DEBUG: FriendRequestSerializer.create called with {validated_data}")
         to_user_id = validated_data.pop('to_user_id')
         to_user = User.objects.get(id=to_user_id)
         from_user = self.context['request'].user
         
-        print(f"DEBUG: Checking existing request from {from_user} to {to_user}")
         if FriendRequest.objects.filter(from_user=from_user, to_user=to_user).exists():
-            print("DEBUG: Request already sent")
             raise serializers.ValidationError("Friend request already sent.")
         
-        print(f"DEBUG: Checking reverse request from {to_user} to {from_user}")
         if FriendRequest.objects.filter(from_user=to_user, to_user=from_user).exists():
-             print("DEBUG: Reverse request exists")
              raise serializers.ValidationError("Friend request already received from this user.")
 
-        print("DEBUG: Creating request")
         return FriendRequest.objects.create(from_user=from_user, to_user=to_user, **validated_data)
 
 class AttachmentSerializer(serializers.ModelSerializer):
